@@ -1,23 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
-
+import React from "react";
+// import Header from "./components/layout/header.js";
+// import Registration from "./components/Auth/registration.js";
+// import Login from "./components/Auth/login.js";
+// import UserDashboard from "./components/Pages/userdashboard.js";
+import Admindashboard from "./components/Pages/Admindashboard.js";
 function App() {
+  //   const [isRegistered, setIsRegistered] = useState(false);
+  //   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  //   const [userRole, setUserRole] = useState("user");
+
+  //   const handleRegistrationSuccess = () => {
+  //     setIsRegistered(true);
+  //   };
+
+  //   const handleLogin = (role) => {
+  //     setIsLoggedIn(true);
+  //     setUserRole(role);
+  //   };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {/* <Header isLoggedIn={isLoggedIn} />
+      {!isRegistered ? (
+        <Registration onRegistrationSuccess={handleRegistrationSuccess} />
+      ) : isLoggedIn ? (
+        userRole === "admin" ? (
+          <Admindashboard />
+        ) : (
+          <UserDashboard />
+        )
+      ) : (
+        <Login onLogin={handleLogin} />
+      )} */}
+      <Admindashboard />
     </div>
   );
 }

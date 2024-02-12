@@ -1,0 +1,67 @@
+.admin-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.admin-dashboard h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.menu-items-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.menu-item-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.menu-item-card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.menu-item-card h3 {
+  margin-top: 0;
+}
+
+.menu-item-card p {
+  margin-bottom: 10px;
+}
+
+.menu-item-card .price {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.add-menu-item-button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.add-menu-item-button:hover {
+  background-color: #0056b3;
+}
+
+.add-menu-item-modal,
+.delete-menu-item-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
