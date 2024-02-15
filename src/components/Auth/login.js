@@ -1,18 +1,16 @@
 import React, { useState } from "react";
 import "./auth.css";
-import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const Login = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://192.168.1.60:5000/signIn", {
+      const response = await fetch("http://192.168.1.103:8000/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -22,17 +20,15 @@ const Login = () => {
 
       if (!response.ok) {
         throw new Error("Invalid credentials");
+      } else {
+        const data = await response.json();
+        console.log(data);
+        localStorage.setItem("token", data.token);
+        console.log("suceessful");
+        onLogin(data.isAdmin);
       }
-
-      // const userData = { userType: "admin" };
-
-      // if (userData.userType === "admin") {
-      //   navigate("/admin-dashboard");
-      // } else {
-      navigate("/user-dashboard");
-      // }
     } catch (error) {
-      setError("Invalid email or password");
+      setError("Invalid email or password", error);
     }
   };
 

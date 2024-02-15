@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import MenuItems from "../items/MenuItems.js";
-import "./userdashboard.css";
-// import { BsCart } from "react-icons/bs";
-import { getMenuItems } from "./Api.js";
+import { getMenuItems, addMenuItem } from "./Api.js";
 import Addmenu from "../items/Addmenu.js";
-import Deletemenu from "../items/Deletemenu.js";
+// import Deletemenu from "../items/Deletemenu.js";
+import "./Admindashboard.css";
+// import Modal from "react-modal";
 
 const AdminDashboard = () => {
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedMenuItem, setSelectedMenuItem] = useState(null);
+  const [showloader, setShowloader] = useState(false);
+  // const [showDeleteModal, setShowDeleteModal] = useState(false);
+  // const [selectedMenuItem, setSelectedMenuItem] = useState(null);
   const [menuData, setMenuData] = useState([
     // {
     //   id: 1,
@@ -84,80 +85,55 @@ const AdminDashboard = () => {
     //     "https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_660/e33e1d3ba7d6b2bb0d45e1001b731fcf"
     // }
   ]);
-  useEffect(() => {
-    const fetchmenuItems = async () => {
-      try {
-        const items = await getMenuItems();
-        setMenuData(items);
-      } catch (error) {
-        console.log(error, " there is a error");
-      }
-    };
-    fetchmenuItems();
-  }, []);
-  // const addToCart = (item) => {
-  //   console.log("Added to cart:", item);
-  // };
-  const handleDeleteMenuItem = async () => {
-    if (selectedMenuItem) {
-      try {
-        await Deletemenu(selectedMenuItem.id);
-        const updatedMenuData = menuData.filter(
-          (item) => item.id !== selectedMenuItem.id
-        );
-        setMenuData(updatedMenuData);
-        setShowDeleteModal(false);
-        setSelectedMenuItem(null);
-      } catch (error) {
-        console.log("Error deleting menu item:", error);
-      }
+  const fetchmenuItems = async () => {
+    try {
+      const items = await getMenuItems();
+      setMenuData(items);
+      setShowloader(false);
+    } catch (error) {
+      console.log(error, " there is a error");
+      setShowloader(false);
     }
   };
 
-  const handleAddMenuItem = async (newMenuItem) => {
+  useEffect(() => {
+    fetchmenuItems();
+  }, []);
+
+  const handleAddMenuItem = async (formData) => {
     try {
-      const newItem = await Addmenu(newMenuItem);
-      setMenuData([...menuData, newItem]);
+      const newItem = await addMenuItem(formData);
+      setMenuData((prevMenuData) => [...prevMenuData, newItem]);
       setShowAddModal(false);
+      setShowloader(true);
+      console.log("data has been added succesfully");
     } catch (error) {
       console.log("Error adding menu item:", error);
     }
   };
-  const handleMenuItemDeleteClick = (menuItem) => {
-    setSelectedMenuItem(menuItem);
-    setShowDeleteModal(true);
-  };
 
+  // const handleMenuItemDeleteClick = (menuItem) => {
+  //   setSelectedMenuItem(menuItem);
+  //   setShowDeleteModal(true);
+  // };
   return (
     <div className="admin-dashboard">
       <h1>Admin Dashboard</h1>
+      <button
+        className="add-menu-item-button"
+        onClick={() => setShowAddModal(true)}
+      >
+        Add Menu Item
+      </button>
       <div className="menu-items-container">
-        <MenuItems
-          menuData={menuData}
-          onDeleteClick={handleMenuItemDeleteClick}
-        />
+        <MenuItems menuData={menuData} isAdmin={true} />
       </div>
-      <div className="button-container">
-        <button
-          className="add-menu-item-button"
-          onClick={() => setShowAddModal(true)}
-        >
-          Add Menu Item
-        </button>
-      </div>
-      {showAddModal && (
-        <Addmenu
-          onClose={() => setShowAddModal(false)}
-          onAdd={handleAddMenuItem}
-        />
-      )}
-      {showDeleteModal && (
-        <Deletemenu
-          menuItem={selectedMenuItem}
-          onClose={() => setShowDeleteModal(false)}
-          onDelete={handleDeleteMenuItem}
-        />
-      )}
+      <div className="add-menu-item-button-container"></div>
+      <Addmenu
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAddMenuItem}
+      />
     </div>
   );
 };

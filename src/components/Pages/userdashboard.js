@@ -1,26 +1,64 @@
-import React, { useState, useEffect, useContext, createContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+  createContext
+} from "react";
+import { Modal, DropdownButton, Badge } from "react-bootstrap";
+import { BsCart } from "react-icons/bs";
+import { getMenuItems } from "./Api.js";
 import MenuItems from "../items/MenuItems.js";
 import "./userdashboard.css";
-import { BsCart } from "react-icons/bs";
-import { Link } from "react-router-dom";
-import {
-  getMenuItems,
-  getBreakfastItems,
-  getLunchItems,
-  getShakesItems
-} from "./Api.js";
+
+const initialState = {
+  cartItems: []
+};
+
+const ADD_TO_CART = "ADD_TO_CART";
+const REMOVE_FROM_CART = "REMOVE_FROM_CART";
+const CLEAR_CART = "CLEAR_CART";
+
+const cartReducer = (state, action) => {
+  switch (action.type) {
+    case ADD_TO_CART:
+      return {
+        ...state,
+        cartItems: [...state.cartItems, action.payload]
+      };
+    case REMOVE_FROM_CART:
+      return {
+        ...state,
+        cartItems: state.cartItems.filter(
+          (item) => item._id !== action.payload._id
+        )
+      };
+    case CLEAR_CART:
+      return {
+        ...state,
+        cartItems: []
+      };
+    default:
+      return state;
+  }
+};
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 const UserDashboard = () => {
   const [menuData, setMenuData] = useState([]);
-  const [cartItems, setCartItems] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const [state, dispatch] = useReducer(cartReducer, initialState);
 
   useEffect(() => {
     fetchMenuItems();
   }, []);
+
+  useEffect(() => {
+    // Update document title with cart item count
+    document.title = `(${state.cartItems.length}) Cart Items`;
+  }, [state.cartItems]);
 
   const fetchMenuItems = async () => {
     try {
@@ -31,97 +69,70 @@ const UserDashboard = () => {
     }
   };
 
-  const fetchBreakfastItems = async () => {
-    try {
-      const items = await getBreakfastItems();
-      setMenuData(items);
-    } catch (error) {
-      console.log(error, " there is a error");
-    }
-  };
-
-  const fetchLunchItems = async () => {
-    try {
-      const items = await getLunchItems();
-      setMenuData(items);
-    } catch (error) {
-      console.log(error, " there is a error");
-    }
-  };
-
-  const fetchShakesItems = async () => {
-    try {
-      const items = await getShakesItems();
-      setMenuData(items);
-    } catch (error) {
-      console.log(error, " there is a error");
-    }
-  };
-
   const addToCart = (item) => {
-    setCartItems((prevItems) => [...prevItems, item]);
+    dispatch({ type: ADD_TO_CART, payload: item });
   };
 
-  const toggleCart = () => {
-    setShowCart((prevShowCart) => !prevShowCart);
+  const removeFromCart = (itemId) => {
+    dispatch({ type: REMOVE_FROM_CART, payload: { _id: itemId } });
+  };
+
+  const clearCart = () => {
+    dispatch({ type: CLEAR_CART });
+    setShowCart(false); // Close modal after clearing cart
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart }}>
+    <CartContext.Provider
+      value={{
+        cartItems: state.cartItems,
+        addToCart,
+        removeFromCart,
+        clearCart
+      }}
+    >
       <div className="button-container">
         <div className="user-dashboard">
-          <div className="dashboard-buttons">
-            <Link to="/all">
-              <button className="dashboard-button" onClick={fetchMenuItems}>
-                All
-              </button>
-            </Link>
-            <Link to="/breakfast">
-              <button
-                className="dashboard-button"
-                onClick={fetchBreakfastItems}
-              >
-                Breakfast
-              </button>
-            </Link>
-            <Link to="/lunch">
-              <button className="dashboard-button" onClick={fetchLunchItems}>
-                Lunch
-              </button>
-            </Link>
-            <Link to="/shakes">
-              <button className="dashboard-button" onClick={fetchShakesItems}>
-                Shakes
-              </button>
-            </Link>
-          </div>
           <h1>Sun Rise</h1>
-          <div className="cart-icon" onClick={toggleCart}>
-            <BsCart />
-            <span className="cart-count">{cartItems.length}</span>
-          </div>
-          {showCart && (
-            <div className="cart-modal">
-              <div className="cart-modal-content">
-                <span className="close" onClick={toggleCart}>
-                  &times;
-                </span>
-                <h2>Cart Items</h2>
-                <ul>
-                  {cartItems.map((item, index) => (
-                    <li key={index}>
-                      <div>{item.name}</div>
-                      <div>{item.description}</div>
-                      <div>{item.price}</div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-          <MenuItems menuData={menuData} addToCart={addToCart} />
+          <DropdownButton
+            id="cart-dropdown"
+            title={
+              <>
+                <BsCart />{" "}
+                <Badge variant="secondary">{state.cartItems.length}</Badge>
+              </>
+            }
+            onClick={() => setShowCart(true)}
+          />
+          <MenuItems
+            menuData={menuData}
+            addToCart={addToCart}
+            removeFromCart={removeFromCart}
+          />
         </div>
       </div>
+
+      <Modal show={showCart} onHide={() => setShowCart(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Cart Items</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ul>
+            {state.cartItems.map((item, index) => (
+              <li key={index}>
+                {item.name} - ${item.price}
+                <span
+                  className="remove-cart-item"
+                  onClick={() => removeFromCart(item._id)}
+                ></span>
+              </li>
+            ))}
+          </ul>
+          <button className="clear-cart-button" onClick={clearCart}>
+            Clear Cart
+          </button>
+        </Modal.Body>
+      </Modal>
     </CartContext.Provider>
   );
 };
